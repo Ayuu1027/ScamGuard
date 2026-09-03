@@ -86,33 +86,33 @@ def analyze_url_detailed(url):
 # ---------------- UI LAYOUT ----------------
 st.markdown("""
 <div class="term-banner">
-    <div class="term-title">🛡️ ScamGuard - AI-Powered Phishing & Fraud Detection</div>
+    <div class="term-title">🛡️ ScamGuard - Phishing Scam & Fraud Detection</div>
     <div class="term-sub">SOC Console v3.0 | Dynamic LLM Defense Engine: ONLINE</div>
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.tabs(["🔍 AI Threat Scan", "🔗 URL Inspector", "🗂 Scan History"])
+tab1, tab2, tab3 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🗂 Scan History"])
 
 with tab1:
-    st.subheader("Dynamic AI Message & Email Threat Scanner")
+    st.subheader("Message & Email Threat Scanner")
     user_msg = st.text_area("Paste suspicious message or email body:", height=140, placeholder="Type or paste any text message, email, or suspicious notification here...")
     
-    if st.button("▶ Run AI Threat Scan"):
+    if st.button("▶ Run Threat Scan"):
         if not user_msg.strip():
             st.warning("Please enter text to scan.")
         elif not gemini_api_key:
-            st.warning("⚠️ Please provide your Gemini API Key in the sidebar or Streamlit secrets to run the AI threat engine.")
+            st.warning("⚠️ Please provide your Gemini API Key in the sidebar or Streamlit secrets to run the threat engine.")
         else:
             with st.spinner("Consulting Gemini global threat intelligence database..."):
                 ai_response = analyze_with_gemini(user_msg, gemini_api_key)
                 
-                st.subheader("📊 AI Threat Analysis Report")
+                st.subheader("📊 Threat Analysis Report")
                 st.markdown(ai_response)
                 
                 # Log history
                 st.session_state.history.append({
                     "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "type": "AI Text Scan",
+                    "type": " Text Scan",
                     "preview": user_msg[:30] + "..."
                 })
 
