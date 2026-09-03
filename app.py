@@ -39,16 +39,14 @@ if api_token:
 def analyze_threat_signature(input_text, analysis_type, token):
     try:
         genai.configure(api_key=token)
-        # Updated to use the latest available standard production model string
-        model = genai.GenerativeModel('gemini-3.8-flash')
+        # Using the fast low-latency production model identifier
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         if analysis_type == "message":
             prompt = f"""
-            You are an expert Cybersecurity Operations Center (SOC) threat analyst. Perform a deep heuristic and behavioral analysis on the following message for phishing, social engineering, or fraud risks:
-            
+            Perform a fast heuristic and behavioral analysis on this message for phishing or fraud risks:
             Message: "{input_text}"
-            
-            Provide your response in this exact format:
+            Provide a concise response in this exact format:
             - Verdict: [Safe or Phishing / Malicious Scam]
             - Risk Level: [None, Low, Medium, or High]
             - Attacker Intent: [Brief description]
@@ -57,11 +55,9 @@ def analyze_threat_signature(input_text, analysis_type, token):
             """
         else:
             prompt = f"""
-            You are an expert Cybersecurity Operations Center (SOC) threat analyst. Analyze the following URL structure for phishing, typosquatting, brand impersonation, or malicious indicators:
-            
+            Analyze this URL structure for typosquatting, brand impersonation, or phishing indicators:
             URL: "{input_text}"
-            
-            Provide your response in this exact format:
+            Provide a concise response in this exact format:
             - Verdict: [Legitimate or Malicious / Typosquatting / Phishing]
             - Risk Level: [None, Low, Medium, or High]
             - Target Brand (if impersonated): [Name of brand or None]
