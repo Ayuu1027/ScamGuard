@@ -1,7 +1,5 @@
 import streamlit as st
 import datetime
-import os
-import re
 from urllib.parse import urlparse
 import google.generativeai as genai
 
@@ -41,54 +39,49 @@ gemini_api_key = st.secrets.get("GEMINI_API_KEY", "") or st.sidebar.text_input("
 if gemini_api_key:
     genai.configure(api_key=gemini_api_key)
 
-# ---------------- PURE GEMINI AI LOGIC ----------------
-def analyze_with_gemini(email_body, api_key):
+# ---------------- GEMINI AI ENGINE ----------------
+def analyze_with_gemini(input_text, analysis_type, api_key):
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-2.5-flash')
-        prompt = f"""
-        You are an expert Cybersecurity Operations Center (SOC) threat analyst. Analyze the following message text for phishing, social engineering, or fraud risks using your comprehensive global knowledge base. Do not rely on static rules; evaluate context, tone, and intent dynamically.
         
-        Message: "{email_body}"
-        
-        Provide your response in this exact format:
-        - Verdict: [Safe or Phishing / Malicious Scam]
-        - Risk Level: [None, Low, Medium, or High]
-        - Attacker Intent: [Brief description of what they are trying to achieve]
-        - Manipulation Tactics: [Key social engineering strategies identified]
-        - Recommended Action: [What the user should do immediately]
-        """
+        if analysis_type == "message":
+            prompt = f"""
+            You are an expert Cybersecurity Operations Center (SOC) threat analyst. Analyze the following message for phishing, social engineering, or fraud risks using your global knowledge base:
+            
+            Message: "{input_text}"
+            
+            Provide your response in this exact format:
+            - Verdict: [Safe or Phishing / Malicious Scam]
+            - Risk Level: [None, Low, Medium, or High]
+            - Attacker Intent: [Brief description]
+            - Manipulation Tactics: [Key strategies]
+            - Recommended Action: [What to do]
+            """
+        else:
+            prompt = f"""
+            You are an expert Cybersecurity Operations Center (SOC) threat analyst. Analyze the following URL for phishing, typosquatting, brand impersonation, or malicious indicators:
+            
+            URL: "{input_text}"
+            
+            Provide your response in this exact format:
+            - Verdict: [Legitimate or Malicious / Typosquatting / Phishing]
+            - Risk Level: [None, Low, Medium, or High]
+            - Target Brand (if impersonated): [Name of brand or None]
+            - Threat Analysis: [Why this URL is safe or dangerous based on its structure and domain spelling]
+            - Recommended Action: [What the user should do]
+            """
+            
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
         return f"Error communicating with Gemini API: {str(e)}"
 
-# URL Structural Checks (Structural checks, not hardcoded content text dictionaries)
-def analyze_url_detailed(url):
-    if not url.startswith("http"): url = "http://" + url
-    parsed = urlparse(url)
-    domain = parsed.netloc.lower()
-    reasons = []
-    score = 0
-
-    if len(url) > 75:
-        score += 20; reasons.append(f"Very long URL ({len(url)} chars)")
-    if re.search(r'https?://(?:\d{1,3}\.){3}\d{1,3}', url):
-        score += 25; reasons.append("Uses IP address instead of domain name")
-    if "@" in url:
-        score += 20; reasons.append("Contains '@' symbol obfuscation")
-    if parsed.scheme == "http":
-        score += 10; reasons.append("Insecure HTTP protocol")
-
-    score = min(100, score)
-    level = "High" if score >= 60 else "Medium" if score >= 30 else "Low" if score > 0 else "None"
-    return {"url": url, "score": score, "risk_level": level, "reasons": reasons}
-
 # ---------------- UI LAYOUT ----------------
 st.markdown("""
 <div class="term-banner">
     <div class="term-title">🛡️ ScamGuard - Phishing Scam & Fraud Detection</div>
-    <div class="term-sub">SOC Console v3.0 | Dynamic LLM Defense Engine: ONLINE</div>
+    <div class="term-sub">SOC Console v3.2 | Pure LLM Intelligence Engine: ONLINE</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -104,32 +97,39 @@ with tab1:
         elif not gemini_api_key:
             st.warning("⚠️ Please provide your Gemini API Key in the sidebar or Streamlit secrets to run the threat engine.")
         else:
-            with st.spinner("Consulting Gemini global threat intelligence database..."):
-                ai_response = analyze_with_gemini(user_msg, gemini_api_key)
+            with st.spinner("Consulting Gemini global threat intelligence..."):
+                ai_response = analyze_with_gemini(user_msg, "message", gemini_api_key)
                 
-                st.subheader("📊 Threat Analysis Report")
+                st.subheader("📊Threat Analysis Report")
                 st.markdown(ai_response)
                 
-                # Log history
                 st.session_state.history.append({
                     "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "type": " Text Scan",
+                    "type": "Text Scan",
                     "preview": user_msg[:30] + "..."
                 })
 
 with tab2:
-    st.subheader("Dedicated URL Phishing Analyzer")
-    url_input = st.text_input("Enter URL to inspect:", placeholder="https://example.com/login")
+    st.subheader("URL Phishing Inspector")
+    url_input = st.text_input("Enter URL to inspect:", placeholder="https://instagramm.com")
+    
     if st.button("Inspect URL"):
-        if url_input.strip():
-            res = analyze_url_detailed(url_input)
-            st.markdown(f"**Structural Risk Level:** `{res['risk_level']}` (Score: {res['score']}/100)")
-            if res['reasons']:
-                st.write("**Detected Structural Anomalies:**")
-                for r in res['reasons']:
-                    st.markdown(f"- ⚠️ {r}")
-            else:
-                st.success("No structural anomalies found.")
+        if not url_input.strip():
+            st.warning("Please enter a URL to inspect.")
+        elif not gemini_api_key:
+            st.warning("⚠️ Please provide your Gemini API Key in the sidebar or Streamlit secrets to run the URL inspector.")
+        else:
+            with st.spinner("Analyzing domain structure and typosquatting vectors with Gemini..."):
+                ai_url_response = analyze_with_gemini(url_input, "url", gemini_api_key)
+                
+                st.subheader("📊 URL Analysis Report")
+                st.markdown(url_response)
+                
+                st.session_state.history.append({
+                    "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "type": "URL Scan",
+                    "preview": url_input[:30] + "..."
+                })
 
 with tab3:
     st.subheader("Session Scan History Log")
