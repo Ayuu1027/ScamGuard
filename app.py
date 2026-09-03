@@ -32,22 +32,22 @@ inject_css()
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# Sidebar Configuration for Gemini API Key
+# Sidebar Configuration for Security Token
 st.sidebar.header("⚙️ Configuration")
-gemini_api_key = st.secrets.get("GEMINI_API_KEY", "") or st.sidebar.text_input("Gemini API Key", type="password", placeholder="YOUR API KEY")
+api_token = st.secrets.get("GEMINI_API_KEY", "") or st.sidebar.text_input("Security Token", type="password", placeholder="ENTER TOKEN")
 
-if gemini_api_key:
-    genai.configure(api_key=gemini_api_key)
+if api_token:
+    genai.configure(api_key=api_token)
 
-# ---------------- GEMINI AI ENGINE ----------------
-def analyze_with_gemini(input_text, analysis_type, api_key):
+# ---------------- THREAT ANALYSIS ENGINE ----------------
+def analyze_threat_signature(input_text, analysis_type, token):
     try:
-        genai.configure(api_key=api_key)
+        genai.configure(api_key=token)
         model = genai.GenerativeModel('gemini-2.5-flash')
         
         if analysis_type == "message":
             prompt = f"""
-            You are an expert Cybersecurity Operations Center (SOC) threat analyst. Analyze the following message for phishing, social engineering, or fraud risks using your global knowledge base:
+            You are an expert Cybersecurity Operations Center (SOC) threat analyst. Perform a deep heuristic and behavioral analysis on the following message for phishing, social engineering, or fraud risks:
             
             Message: "{input_text}"
             
@@ -60,7 +60,7 @@ def analyze_with_gemini(input_text, analysis_type, api_key):
             """
         else:
             prompt = f"""
-            You are an expert Cybersecurity Operations Center (SOC) threat analyst. Analyze the following URL for phishing, typosquatting, brand impersonation, or malicious indicators:
+            You are an expert Cybersecurity Operations Center (SOC) threat analyst. Analyze the following URL structure for phishing, typosquatting, brand impersonation, or malicious indicators:
             
             URL: "{input_text}"
             
@@ -75,13 +75,13 @@ def analyze_with_gemini(input_text, analysis_type, api_key):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Error communicating with Gemini API: {str(e)}"
+        return f"Error executing threat analysis engine: {str(e)}"
 
 # ---------------- UI LAYOUT ----------------
 st.markdown("""
 <div class="term-banner">
     <div class="term-title">🛡️ ScamGuard - Phishing Scam & Fraud Detection</div>
-    <div class="term-sub">SOC Console v3.2 | Pure LLM Intelligence Engine: ONLINE</div>
+    <div class="term-sub">SOC Console v3.2 | Neural Defense Engine: ONLINE</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -94,14 +94,14 @@ with tab1:
     if st.button("▶ Run Threat Scan"):
         if not user_msg.strip():
             st.warning("Please enter text to scan.")
-        elif not gemini_api_key:
-            st.warning("⚠️ Please provide your Gemini API Key in the sidebar or Streamlit secrets to run the threat engine.")
+        elif not api_token:
+            st.warning("⚠️ Please provide your security token in the sidebar configuration.")
         else:
-            with st.spinner("Consulting Gemini global threat intelligence..."):
-                ai_response = analyze_with_gemini(user_msg, "message", gemini_api_key)
+            with st.spinner("Executing threat heuristic analysis..."):
+                analysis_result = analyze_threat_signature(user_msg, "message", api_token)
                 
-                st.subheader("📊Threat Analysis Report")
-                st.markdown(ai_response)
+                st.subheader("📊 Threat Analysis Report")
+                st.markdown(analysis_result)
                 
                 st.session_state.history.append({
                     "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -116,14 +116,14 @@ with tab2:
     if st.button("Inspect URL"):
         if not url_input.strip():
             st.warning("Please enter a URL to inspect.")
-        elif not gemini_api_key:
-            st.warning("⚠️ Please provide your Gemini API Key in the sidebar or Streamlit secrets to run the URL inspector.")
+        elif not api_token:
+            st.warning("⚠️ Please provide your security token in the sidebar configuration.")
         else:
-            with st.spinner("Analyzing domain structure and typosquatting vectors with Gemini..."):
-                ai_url_response = analyze_with_gemini(url_input, "url", gemini_api_key)
+            with st.spinner("Analyzing domain structure and typosquatting vectors..."):
+                url_analysis_result = analyze_threat_signature(url_input, "url", api_token)
                 
                 st.subheader("📊 URL Analysis Report")
-                st.markdown(url_response)
+                st.markdown(url_analysis_result)
                 
                 st.session_state.history.append({
                     "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
