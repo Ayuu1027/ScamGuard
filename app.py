@@ -39,7 +39,8 @@ if api_token:
 def analyze_threat_signature(input_text, analysis_type, token):
     try:
         genai.configure(api_key=token)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Updated to use the latest available standard production model string
+        model = genai.GenerativeModel('gemini-3.8-flash')
         
         if analysis_type == "message":
             prompt = f"""
