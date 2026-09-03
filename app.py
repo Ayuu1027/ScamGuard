@@ -1,16 +1,15 @@
 import streamlit as st
+import pandas as pd
 import datetime
 from urllib.parse import urlparse
 import google.generativeai as genai
 
-# Page Configuration
 st.set_page_config(
     page_title="SOC-Console | Phishing Scam & Fraud Detection", 
     page_icon="🛡️", 
     layout="wide"
 )
 
-# ---------------- CSS STYLING ----------------
 def inject_css():
     st.markdown("""
     <style>
@@ -28,22 +27,19 @@ def inject_css():
 
 inject_css()
 
-# Initialize Session State
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# Sidebar Configuration for Security Token
 st.sidebar.header("⚙️ Configuration")
 api_token = st.secrets.get("GEMINI_API_KEY", "") or st.sidebar.text_input("Security Token", type="password", placeholder="ENTER TOKEN")
 
 if api_token:
     genai.configure(api_key=api_token)
 
-# ---------------- THREAT ANALYSIS ENGINE ----------------
 def analyze_threat_signature(input_text, analysis_type, token):
     try:
         genai.configure(api_key=token)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         if analysis_type == "message":
             prompt = f"""
@@ -77,7 +73,6 @@ def analyze_threat_signature(input_text, analysis_type, token):
     except Exception as e:
         return f"Error executing threat analysis engine: {str(e)}"
 
-# ---------------- UI LAYOUT ----------------
 st.markdown("""
 <div class="term-banner">
     <div class="term-title">🛡️ ScamGuard - Phishing Scam & Fraud Detection</div>
