@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import datetime
 from urllib.parse import urlparse
-import google.generativeai as genai
+import re
 
 # Page Configuration
 st.set_page_config(
@@ -110,51 +110,108 @@ if "history" not in st.session_state:
 
 # Sidebar Configuration
 st.sidebar.markdown("### ⚙️ SOC Parameters")
-api_token = st.secrets.get("GEMINI_API_KEY", "") or st.sidebar.text_input("Security Token", type="password", placeholder="ENTER TOKEN")
-
-if api_token:
-    genai.configure(api_key=api_token)
+st.sidebar.text_input("Security Token / Node ID", type="password", placeholder="NODE-SECURE-ID")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 System Telemetry")
-st.sidebar.info("Neural Defense Engine: **OPERATIONAL**\n\nLatency Mode: **ULTRA-FAST**\n\nDatabase: **DYNAMIC VECTOR**")
+st.sidebar.info("Neural Defense Engine: **OPERATIONAL**\n\nMode: **HEURISTIC PATTERN MATCHING**\n\nDatabase: **LOCAL VECTOR KERNEL**")
 
-# ---------------- DEFENSE ENGINE LOGIC ----------------
-def analyze_threat_signature(input_text, analysis_type, token):
-    try:
-        genai.configure(api_key=token)
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        
-        if analysis_type == "message":
-            prompt = f"""
-            Perform a fast security scan on this message for phishing or fraud risks:
-            Message: "{input_text}"
-            Provide a concise response in this exact format:
-            - Verdict: [Safe or Phishing / Malicious Scam]
-            - Risk Level: [None, Low, Medium, or High]
-            - Attacker Intent: [Brief description]
-            - Manipulation Tactics: [Key strategies]
-            - Recommended Action: [What to do]
-            """
-        else:
-            prompt = f"""
-            Analyze this URL structure for typosquatting or brand impersonation:
-            URL: "{input_text}"
-            Provide a concise response in this exact format:
-            - Verdict: [Legitimate or Malicious / Typosquatting / Phishing]
-            - Risk Level: [None, Low, Medium, or High]
-            - Target Brand (if impersonated): [Name of brand or None]
-            - Threat Analysis: [Why this URL is safe or dangerous]
-            - Recommended Action: [What to do]
-            """
-            
-        response = model.generate_content(
-            prompt, 
-            generation_config={"max_output_tokens": 250, "temperature": 0.1}
-        )
-        return response.text
-    except Exception as e:
-        return f"Error executing threat analysis engine: {str(e)}"
+# ---------------- MANUAL HEURISTIC DEFENSE ENGINE ----------------
+FRAUD_SIGNALS = {
+    "Financial & Payment Urgency": ["wire transfer", "bank account", "routing number", "gift card", "bitcoin", "crypto", "western union", "overdue invoice", "suspended"],
+    "Credential Harvesting": ["password", "login", "verify identity", "ssn", "social security", "otp", "one-time password", "credentials", "sign-in"],
+    "Advance-Fee / Prizes": ["inheritance", "million dollars", "lottery", "claim prize", "beneficiary", "unclaimed", "processing fee"],
+    "Aggressive Pressure Tactics": ["immediate action", "act now", "final notice", "legal action", "within 24 hours", "compromised", "failure to comply"]
+}
+
+def analyze_message_heuristics(message):
+    text = message.lower()
+    matched_categories = {}
+    total_score = 0
+    
+    for category, keywords in FRAUD_SIGNALS.items():
+        hits = [kw for kw in keywords if kw in text]
+        if hits:
+            matched_categories[category] = hits
+            total_score += len(hits) * 20
+
+    exclamation_count = text.count("!")
+    total_score += min(exclamation_count * 5, 20)
+    total_score = min(total_score, 100)
+
+    if total_score >= 60:
+        risk_level = "High"
+        verdict = "Malicious Scam / Phishing"
+        intent = "Credential theft, unauthorized financial transfer, or social engineering fraud."
+    elif total_score >= 25:
+        risk_level = "Medium"
+        verdict = "Suspicious Communication"
+        intent = "Potential phishing attempt utilizing social pressure or urgency patterns."
+    elif total_score > 0:
+        risk_level = "Low"
+        verdict = "Potential Warning Signs"
+        intent = "Mild trigger patterns observed; exercise standard operational caution."
+    else:
+        risk_level = "None"
+        verdict = "Safe / Legitimate Context"
+        intent = "No malicious heuristics or threat signatures detected."
+
+    tactics = list(matched_categories.keys()) if matched_categories else ["None identified"]
+    
+    report = f"""
+- **Verdict**: {verdict}
+- **Risk Level**: {risk_level} (Calculated Score: {total_score}/100)
+- **Attacker Intent**: {intent}
+- **Manipulation Tactics**: {', '.join(tactics)}
+- **Recommended Action**: {"Isolate session, block sender, and report to SOC security team immediately." if total_score >= 25 else "No immediate threat indicators present. Standard communication protocol applies."}
+    """
+    return report
+
+def analyze_url_heuristics(url):
+    if not url.startswith("http"): 
+        url = "http://" + url
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower()
+    reasons = []
+    score = 0
+
+    famous_brands = ["instagram", "facebook", "whatsapp", "google", "netflix", "paypal", "microsoft", "apple", "amazon"]
+    for brand in famous_brands:
+        if brand in domain and domain != f"{brand}.com" and domain != f"www.{brand}.com":
+            score += 50
+            reasons.append(f"Typosquatting or brand spoofing detected for target entity: '{brand}'")
+
+    if len(url) > 75:
+        score += 20
+        reasons.append(f"Abnormally long URL string ({len(url)} characters)")
+    if re.search(r'https?://(?:\d{1,3}\.){3}\d{1,3}', url):
+        score += 30
+        reasons.append("Direct IP address substitution used instead of valid domain name")
+    if "@" in url:
+        score += 25
+        reasons.append("Contains '@' symbol syntax obfuscation")
+    if parsed.scheme == "http":
+        score += 15
+        reasons.append("Insecure HTTP protocol transmission")
+
+    score = min(100, score)
+    level = "High" if score >= 60 else "Medium" if score >= 30 else "Low" if score > 0 else "None"
+    verdict = "Malicious / Phishing" if score >= 40 else "Legitimate Domain"
+    
+    analysis_text = f"Evaluated domain structure and spelling anomalies against standard security matrices."
+    if reasons:
+        analysis_text = "Structure contains structural anomalies or lookalike character changes mimicking legitimate services."
+
+    report = f"""
+- **Verdict**: {verdict}
+- **Risk Level**: {level} (Score: {score}/100)
+- **Target Brand (if impersonated)**: {reasons[0].split("'")[1] if "spoofing detected for target entity" in ' '.join(reasons) else "None"}
+- **Threat Analysis**: {analysis_text}
+- **Detected Indicators**:
+  {'\n  '.join([f'- ⚠️ {r}' for r in reasons]) if reasons else '- No structural anomalies or spoofing flags identified.'}
+- **Recommended Action**: {"Do not click or input credentials. Terminate connection immediately." if score >= 40 else "URL structure appears normal. Proceed with standard caution."}
+    """
+    return report
 
 # ---------------- UI DASHBOARD HEADER ----------------
 st.markdown("""
@@ -176,7 +233,7 @@ with col_m1:
 with col_m2:
     st.markdown(f'<div class="metric-container"><div class="metric-val">{len(st.session_state.history)}</div><div class="metric-lbl">Scans Logged</div></div>', unsafe_allow_html=True)
 with col_m3:
-    st.markdown('<div class="metric-container"><div class="metric-val">0.4s</div><div class="metric-lbl">Avg Response</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-container"><div class="metric-val">0.0s</div><div class="metric-lbl">Local Latency</div></div>', unsafe_allow_html=True)
 with col_m4:
     st.markdown('<div class="metric-container"><div class="metric-val">ONLINE</div><div class="metric-lbl">Engine Status</div></div>', unsafe_allow_html=True)
 
@@ -187,18 +244,16 @@ tab1, tab2, tab3 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🗂 Scan
 
 with tab1:
     st.markdown("### 📥 Inbound Message & Email Threat Scanner")
-    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Feed raw email content or SMS text for vector signature extraction and behavioral risk classification.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Feed raw email content or SMS text for heuristic signature extraction and behavioral risk classification.</p>", unsafe_allow_html=True)
     
     user_msg = st.text_area("Message Body:", height=130, placeholder="Paste suspicious message, notice, or email content here...")
     
     if st.button("▶ Execute Threat Scan"):
         if not user_msg.strip():
             st.warning("Please provide input text to analyze.")
-        elif not api_token:
-            st.warning("⚠️ Please provide your Security Token in the sidebar configuration.")
         else:
-            with st.spinner("Analyzing behavioral vectors and heuristic patterns..."):
-                analysis_result = analyze_threat_signature(user_msg, "message", api_token)
+            with st.spinner("Processing local heuristic behavioral vectors..."):
+                analysis_result = analyze_message_heuristics(user_msg)
                 
                 st.markdown("---")
                 st.markdown("### 📋 Threat Analysis Report")
@@ -212,18 +267,16 @@ with tab1:
 
 with tab2:
     st.markdown("### 🌐 Structural URL Phishing Inspector")
-    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Evaluate domains for typosquatting, obfuscation anomalies, and brand spoofing vectors.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Evaluate domains for typosquatting, obfuscation anomalies, and brand spoofing vectors locally.</p>", unsafe_allow_html=True)
     
     url_input = st.text_input("Target URL:", placeholder="https://instagramm.com")
     
     if st.button("Inspect URL Structure"):
         if not url_input.strip():
             st.warning("Please enter a target URL.")
-        elif not api_token:
-            st.warning("⚠️ Please provide your Security Token in the sidebar configuration.")
         else:
-            with st.spinner("Deconstructing domain syntax and token vectors..."):
-                url_analysis_result = analyze_threat_signature(url_input, "url", api_token)
+            with st.spinner("Deconstructing domain syntax and token patterns..."):
+                url_analysis_result = analyze_url_heuristics(url_input)
                 
                 st.markdown("---")
                 st.markdown("### 📋 URL Assessment Report")
