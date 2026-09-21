@@ -1,15 +1,34 @@
-import streamlit as st
 import pandas as pd
-import datetime
+import numpy as np
+import re
+import streamlit as st
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import make_pipeline
+import joblib
 from urllib.parse import urlparse
+import datetime
+import os
 import google.generativeai as genai
 
+# NLTK Setup
+import nltk
+try:
+    from nltk.corpus import stopwords
+    STOPWORDS = set(stopwords.words("english"))
+except:
+    nltk.download('stopwords')
+    from nltk.corpus import stopwords
+    STOPWORDS = set(stopwords.words("english"))
+
+# Page Configuration
 st.set_page_config(
     page_title="SOC-Console | Phishing Scam & Fraud Detection", 
     page_icon="🛡️", 
     layout="wide"
 )
 
+# ---------------- CSS STYLING ----------------
 def inject_css():
     st.markdown("""
     <style>
@@ -22,105 +41,184 @@ def inject_css():
         .term-banner { border: 1px solid rgba(0,255,157,0.35); background: linear-gradient(180deg, rgba(0,255,157,0.06), rgba(0,0,0,0)); border-radius: 6px; padding: 18px 22px; margin-bottom: 18px; box-shadow: 0 0 25px rgba(0,255,157,0.08); }
         .term-title { font-size: 26px; font-weight: 800; color: var(--neon-green); text-shadow: 0 0 12px rgba(0,255,157,0.5); }
         .term-sub { color: #6b8a80; font-size: 12px; margin-top: 4px; }
+        .pill { font-size: 11px; padding: 4px 10px; border-radius: 3px; border: 1px solid rgba(0,255,157,0.3); color: var(--neon-green); background: rgba(0,255,157,0.05); }
     </style>
     """, unsafe_allow_html=True)
 
 inject_css()
 
+# Initialize Session State
 if "history" not in st.session_state:
     st.session_state.history = []
 
+# Sidebar Configuration for Gemini API Key (Supports Streamlit Secrets or Manual Input)
 st.sidebar.header("⚙️ Configuration")
-api_token = st.secrets.get("GEMINI_API_KEY", "") or st.sidebar.text_input("Security Token", type="password", placeholder="ENTER TOKEN")
+default_api_key = st.secrets.get("GEMINI_API_KEY", "")
+gemini_api_key = st.sidebar.text_input("Gemini API Key", value=default_api_key, type="password", placeholder="Enter your Gemini API key")
 
-if api_token:
-    genai.configure(api_key=api_token)
+# ---------------- LOGIC ----------------
+def clean_email_body(email_body):
+    email_body = re.sub(r'[^a-zA-Z\s]', '', email_body)
+    email_body = ' '.join([word.lower() for word in email_body.split() if word.lower() not in STOPWORDS])
+    return email_body
 
-def analyze_threat_signature(input_text, analysis_type, token):
+FRAUD_SIGNAL_CATEGORIES = {
+    "Advance-Fee / Inheritance Scam": ["inheritance", "next of kin", "unclaimed fund", "beneficiary", "estate of", "million dollars", "lottery winner", "claim your prize", "processing fee", "diplomatic courier"],
+    "Financial / Payment Urgency": ["wire transfer", "bank account", "routing number", "gift card", "bitcoin", "crypto wallet", "western union", "urgent payment", "overdue invoice", "account suspended", "verify your account"],
+    "Credential Harvesting": ["social security number", "ssn", "date of birth", "login credentials", "confirm your password", "verify your identity", "otp code", "one time password"],
+    "Pressure Tactics": ["act now", "immediate action required", "final notice", "legal action", "within 24 hours", "failure to comply", "account has been compromised"],
+}
+
+def extract_fraud_signals(email_body):
+    text = email_body.lower()
+    matched = {}
+    total_hits = 0
+    for cat, kws in FRAUD_SIGNAL_CATEGORIES.items():
+        hits = [kw for kw in kws if kw in text]
+        if hits:
+            matched[cat] = hits
+            total_hits += len(hits)
+    exclamation_density = text.count('!') / max(len(text.split()), 1)
+    currency_mentions = len(re.findall(r'(\$|usd|inr|₹|€|eur)\s?\d', text))
+    score = min(100, (total_hits * 12) + (currency_mentions * 8) + (exclamation_density * 100))
+    if score >= 60: level = "High"
+    elif score >= 25: level = "Medium"
+    elif score > 0: level = "Low"
+    else: level = "None"
+    return {"score": round(score, 1), "risk_level": level, "categories": matched, "currency_mentions": currency_mentions}
+
+def analyze_with_gemini(email_body, api_key):
     try:
-        genai.configure(api_key=token)
-        model = genai.GenerativeModel('gemini-3.5-flash-lite')
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        prompt = f"""
+        You are an expert Cybersecurity Operations Center (SOC) threat analyst. Analyze the following message text for phishing, social engineering, or fraud risks using your comprehensive global knowledge base:
         
-        if analysis_type == "message":
-            prompt = f"""
-            Perform a fast heuristic and behavioral analysis on this message for phishing or fraud risks:
-            Message: "{input_text}"
-            Provide a concise response in this exact format:
-            - Verdict: [Safe or Phishing / Malicious Scam]
-            - Risk Level: [None, Low, Medium, or High]
-            - Attacker Intent: [Brief description]
-            - Manipulation Tactics: [Key strategies]
-            - Recommended Action: [What to do]
-            """
-        else:
-            prompt = f"""
-            Analyze this URL structure for typosquatting, brand impersonation, or phishing indicators:
-            URL: "{input_text}"
-            Provide a concise response in this exact format:
-            - Verdict: [Legitimate or Malicious / Typosquatting / Phishing]
-            - Risk Level: [None, Low, Medium, or High]
-            - Target Brand (if impersonated): [Name of brand or None]
-            - Threat Analysis: [Why this URL is safe or dangerous based on its structure and domain spelling]
-            - Recommended Action: [What the user should do]
-            """
-            
+        "{email_body}"
+        
+        Provide a concise, highly structured threat breakdown detailing:
+        1. **Verdict**: [Safe or Phishing / Malicious Scam]
+        2. **Attacker Intent / Objective**: What are they trying to achieve?
+        3. **Social Engineering Tactics**: Key manipulation strategies used in the text.
+        4. **Recommended User Action**: What should the recipient do immediately?
+        """
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Error executing threat analysis engine: {str(e)}"
+        return f"Error communicating with Gemini API: {str(e)}"
 
+# Load or Train Model
+@st.cache_resource
+def load_or_train_model():
+    if os.path.exists('phishing_model.pkl'):
+        return joblib.load('phishing_model.pkl')
+    else:
+        default_texts = [
+            "Congratulations you won a lottery claim your prize now",
+            "Urgent bank account suspended verify credentials immediately",
+            "Hey let's catch up for meeting tomorrow afternoon",
+            "Please find attached project report for review"
+        ]
+        default_labels = [1, 1, 0, 0]
+        df = pd.DataFrame({'email_body': default_texts, 'label': default_labels})
+        df['cleaned_body'] = df['email_body'].apply(clean_email_body)
+        model = make_pipeline(CountVectorizer(), MultinomialNB())
+        model.fit(df['cleaned_body'], df['label'])
+        joblib.dump(model, 'phishing_model.pkl')
+        return model
+
+model = load_or_train_model()
+
+# URL Checker Logic
+SHORTENERS = ["bit.ly","tinyurl","goo.gl","t.co","ow.ly","is.gd","buff.ly","adf.ly"]
+SUSPICIOUS_KEYWORDS = ["login","secure","account","webscr","signin","banking","confirm","update"]
+
+def analyze_url_detailed(url):
+    if not url.startswith("http"): url = "http://" + url
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower()
+    reasons = []
+    score = 0
+
+    if len(url) > 75:
+        score += 20; reasons.append(f"Very long URL ({len(url)} chars)")
+    if re.search(r'https?://(?:\d{1,3}\.){3}\d{1,3}', url):
+        score += 25; reasons.append("Uses IP address instead of domain name")
+    if "@" in url:
+        score += 20; reasons.append("Contains '@' symbol obfuscation")
+    if any(s in domain for s in SHORTENERS):
+        score += 15; reasons.append("URL shortener detected")
+    if parsed.scheme == "http":
+        score += 10; reasons.append("Insecure HTTP protocol")
+    if any(kw in url.lower() for kw in SUSPICIOUS_KEYWORDS):
+        score += 15; reasons.append("Contains sensitive keywords (login/secure)")
+
+    score = min(100, score)
+    level = "High" if score >= 60 else "Medium" if score >= 30 else "Low" if score > 0 else "None"
+    return {"url": url, "score": score, "risk_level": level, "reasons": reasons}
+
+# ---------------- UI LAYOUT ----------------
 st.markdown("""
 <div class="term-banner">
-    <div class="term-title">🛡️ ScamGuard - Phishing Scam & Fraud Detection</div>
-    <div class="term-sub">SOC Console v3.2 | Neural Defense Engine: ONLINE</div>
+    <div class="term-title">🛡️ ScamGuard - AI Phishing Scam & Fraud Detection</div>
+    <div class="term-sub">SOC Console v2.4 | System Status: ONLINE | Active Defense Enabled</div>
 </div>
 """, unsafe_allow_html=True)
 
 tab1, tab2, tab3 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🗂 Scan History"])
 
 with tab1:
-    st.subheader("Message & Email Threat Scanner")
-    user_msg = st.text_area("Paste suspicious message or email body:", height=140, placeholder="Type or paste any text message, email, or suspicious notification here...")
+    st.subheader("Email & Message Threat Scanner")
+    email_input = st.text_area("Paste email or message body:", height=140, placeholder="Congratulations! You've won a $1000 gift card...")
     
     if st.button("▶ Run Threat Scan"):
-        if not user_msg.strip():
+        if not email_input.strip():
             st.warning("Please enter text to scan.")
-        elif not api_token:
-            st.warning("⚠️ Please provide your security token in the sidebar configuration.")
         else:
-            with st.spinner("Executing threat heuristic analysis..."):
-                analysis_result = analyze_threat_signature(user_msg, "message", api_token)
-                
-                st.subheader("📊 Threat Analysis Report")
-                st.markdown(analysis_result)
-                
-                st.session_state.history.append({
-                    "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "type": "Text Scan",
-                    "preview": user_msg[:30] + "..."
-                })
+            cleaned = clean_email_body(email_input)
+            pred = model.predict([cleaned])[0]
+            verdict = "Phishing / Malicious" if pred == 1 else "Safe"
+            
+            fraud_data = extract_fraud_signals(email_input)
+            
+            st.markdown(f"**Local ML Verdict:** `{verdict}` | **Heuristic Risk Score:** `{fraud_data['score']}/100 ({fraud_data['risk_level']})`")
+            
+            if fraud_data['categories']:
+                st.write("**Matched Social Engineering Categories:**")
+                for cat, kws in fraud_data['categories'].items():
+                    st.markdown(f"- **{cat}**: {', '.join(kws)}")
+            
+            # Gemini LLM Deep Analysis Section (Unleashing Gemini's massive intelligence)
+            if gemini_api_key:
+                st.markdown("---")
+                st.subheader("🧠 Gemini AI Deep Threat Intelligence")
+                with st.spinner("Consulting Gemini global threat intelligence..."):
+                    gemini_analysis = analyze_with_gemini(email_input, gemini_api_key)
+                    st.markdown(gemini_analysis)
+            else:
+                st.info("💡 Tip: Enter your Gemini API key in the sidebar configuration to unlock deep AI-powered context analysis regardless of preset training limitations.")
+            
+            # Log history
+            st.session_state.history.append({
+                "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "type": "Email Scan",
+                "verdict": verdict,
+                "risk": fraud_data['risk_level']
+            })
 
 with tab2:
-    st.subheader("URL Phishing Inspector")
-    url_input = st.text_input("Enter URL to inspect:", placeholder="https://instagramm.com")
-    
+    st.subheader("Dedicated URL Phishing Analyzer")
+    url_input = st.text_input("Enter URL to inspect:", placeholder="https://example.com/login")
     if st.button("Inspect URL"):
-        if not url_input.strip():
-            st.warning("Please enter a URL to inspect.")
-        elif not api_token:
-            st.warning("⚠️ Please provide your security token in the sidebar configuration.")
-        else:
-            with st.spinner("Analyzing domain structure and typosquatting vectors..."):
-                url_analysis_result = analyze_threat_signature(url_input, "url", api_token)
-                
-                st.subheader("📊 URL Analysis Report")
-                st.markdown(url_analysis_result)
-                
-                st.session_state.history.append({
-                    "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "type": "URL Scan",
-                    "preview": url_input[:30] + "..."
-                })
+        if url_input.strip():
+            res = analyze_url_detailed(url_input)
+            st.markdown(f"**Risk Level:** `{res['risk_level']}` (Score: {res['score']}/100)")
+            if res['reasons']:
+                st.write("**Detected Indicators:**")
+                for r in res['reasons']:
+                    st.markdown(f"- ⚠️ {r}")
+            else:
+                st.success("No malicious URL signatures found.")
 
 with tab3:
     st.subheader("Session Scan History Log")
