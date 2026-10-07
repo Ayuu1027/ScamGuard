@@ -98,6 +98,13 @@ def inject_css():
 
 inject_css()
 
+# Initialize session state for quick-fill payloads
+if "msg_input" not in st.session_state:
+    st.session_state.msg_input = ""
+
+if "url_input" not in st.session_state:
+    st.session_state.url_input = ""
+
 # ---------------- SIDEBAR DASHBOARD ----------------
 st.sidebar.markdown("### ⚙️ SOC Control Panel")
 st.sidebar.text_input("Node Security Token", type="password", placeholder="NODE-SECURE-KEY")
@@ -229,7 +236,7 @@ st.markdown("""
 <div class="soc-banner">
     <div>
         <div class="soc-title">🛡️ ScamGuard SOC-Console</div>
-        <div class="soc-sub"> Phishing Scam & Fraud Detection</div>
+        <div class="soc-sub">Advanced Local Heuristic Threat Analysis & Behavioral Telemetry Interface</div>
     </div>
     <div>
         <span class="status-badge">🟢 SECURE KERNEL</span>
@@ -244,7 +251,19 @@ with tab1:
     st.markdown("### Inbound Message & Email Threat Scanner")
     st.markdown("<p style='font-size:13px; color:#64748b;'>Evaluate raw email body content or SMS text payloads for heuristic signature extraction and social engineering risk scoring.</p>", unsafe_allow_html=True)
     
-    user_msg = st.text_area("Message Body:", height=130, placeholder="Paste suspicious message, notice, or email content here...")
+    # Quick-Fill Payload Buttons
+    col_b1, col_b2, col_b3 = st.columns(3)
+    with col_b1:
+        if st.button("Load Phishing SMS Sample"):
+            st.session_state.msg_input = "URGENT: Your bank account has been suspended due to unusual activity. Verify your identity and password immediately by clicking here or face legal action within 24 hours!"
+    with col_b2:
+        if st.button("Load Safe Message Sample"):
+            st.session_state.msg_input = "Hey Ayush, are we still meeting up for coffee at 4 PM today? Let me know if you are running late."
+    with col_b3:
+        if st.button("Clear Text Area"):
+            st.session_state.msg_input = ""
+
+    user_msg = st.text_area("Message Body:", value=st.session_state.msg_input, height=130, placeholder="Paste suspicious message, notice, or email content here...")
     
     if st.button("Execute Threat Scan"):
         if not user_msg.strip():
@@ -268,7 +287,19 @@ with tab2:
     st.markdown("### Structural URL Phishing Inspector")
     st.markdown("<p style='font-size:13px; color:#64748b;'>Deconstruct target domain parameters for typosquatting, syntax obfuscation, and brand spoofing vectors locally.</p>", unsafe_allow_html=True)
     
-    url_input = st.text_input("Target URL:", placeholder="https://instagramm.com")
+    # Quick-Fill URL Buttons
+    col_u1, col_u2, col_u3 = st.columns(3)
+    with col_u1:
+        if st.button("Load Typosquat URL"):
+            st.session_state.url_input = "https://netflix-secure-billing-update.com/signin"
+    with col_u2:
+        if st.button("Load Legitimate URL"):
+            st.session_state.url_input = "https://www.netflix.com"
+    with col_u3:
+        if st.button("Clear URL Field"):
+            st.session_state.url_input = ""
+
+    url_input = st.text_input("Target URL:", value=st.session_state.url_input, placeholder="https://instagramm.com")
     
     if st.button("Inspect URL Structure"):
         if not url_input.strip():
