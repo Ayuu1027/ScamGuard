@@ -7,13 +7,108 @@ import datetime
 st.set_page_config(
     page_title="SOC-Console | Phishing Scam & Fraud Detection", 
     page_icon="🛡️", 
-    layout="centered"
+    layout="wide"
 )
 
-# Simple Header
-st.markdown("### 🛡️ ScamGuard - Phishing & Fraud Detection Console")
-st.markdown("<p style='font-size: 13px; color: #888;'>Local Heuristic Threat Analysis & Security Awareness Engine</p>", unsafe_allow_html=True)
-st.markdown("---")
+# ---------------- PROFESSIONAL CSS STYLING ----------------
+def inject_css():
+    st.markdown("""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+        
+        html, body, [class*="css"] { 
+            font-family: 'JetBrains Mono', monospace; 
+        }
+        
+        :root { 
+            --bg-deep: #030608; 
+            --bg-panel: #080e13; 
+            --bg-card: #0d161d;
+            --neon-green: #00ff9d; 
+            --neon-cyan: #00e5ff; 
+            --neon-red: #ff2e63; 
+            --neon-amber: #ffb800; 
+            --text-main: #c0d8d0;
+            --border-glow: rgba(0, 255, 157, 0.2);
+        }
+
+        .stApp { 
+            background: radial-gradient(circle at 10% 20%, #081617 0%, var(--bg-deep) 60%);
+            color: var(--text-main); 
+        }
+
+        #MainMenu, footer, header { visibility: hidden; }
+        .block-container { padding-top: 1.5rem; max-width: 1250px; }
+
+        /* Custom Header Banner */
+        .soc-banner { 
+            border: 1px solid var(--border-glow); 
+            background: linear-gradient(135deg, rgba(0,255,157,0.08) 0%, rgba(8,14,19,0.8) 100%); 
+            border-radius: 8px; 
+            padding: 22px 28px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 0 30px rgba(0,255,157,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .soc-title { font-size: 26px; font-weight: 800; color: var(--neon-green); letter-spacing: -0.5px; text-shadow: 0 0 15px rgba(0,255,157,0.4); }
+        .soc-sub { color: #6b8a80; font-size: 12px; margin-top: 4px; }
+        .status-badge { background: rgba(0,255,157,0.1); border: 1px solid var(--neon-green); color: var(--neon-green); padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+
+        /* Metric Cards */
+        .metric-container {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+        .metric-val { font-size: 18px; font-weight: 700; color: var(--neon-cyan); }
+        .metric-lbl { font-size: 11px; color: #6b8a80; margin-top: 2px; text-transform: uppercase; }
+
+        /* Tabs styling */
+        .stTabs [data-baseweb="tab-list"] { gap: 10px; background-color: transparent; }
+        .stTabs [data-baseweb="tab"] { 
+            background-color: var(--bg-panel); 
+            border: 1px solid rgba(255,255,157,0.08);
+            border-radius: 6px 6px 0 0; 
+            color: #8fa8a0;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        .stTabs [aria-selected="true"] { 
+            background-color: var(--bg-card) !important; 
+            border-color: var(--neon-green) !important;
+            color: var(--neon-green) !important;
+        }
+
+        /* Buttons */
+        .stButton button {
+            background: linear-gradient(90deg, rgba(0,255,157,0.15) 0%, rgba(0,229,255,0.15) 100%);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            font-weight: 700;
+            border-radius: 4px;
+            padding: 0.6rem 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .stButton button:hover {
+            background: var(--neon-green);
+            color: var(--bg-deep);
+            box-shadow: 0 0 15px rgba(0,255,157,0.4);
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+inject_css()
+
+# Sidebar Configuration View
+st.sidebar.markdown("### ⚙️ SOC Control Panel")
+st.sidebar.text_input("Node Security Token", type="password", placeholder="NODE-SECURE-KEY")
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 📊 System Telemetry")
+st.sidebar.info("Defense Engine: **OPERATIONAL**\n\nMode: **LOCAL HEURISTIC KERNEL**\n\nDatabase: **DYNAMIC VECTOR**")
 
 # ---------------- MANUAL HEURISTIC ENGINE ----------------
 FRAUD_SIGNALS = {
@@ -56,8 +151,8 @@ def analyze_message_heuristics(message):
         intent = "No malicious heuristics detected."
 
     tactics = list(matched_categories.keys()) if matched_categories else ["None identified"]
-    
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     report = f"""========================================
 SCAMGUARD INCIDENT REPORT - MESSAGE SCAN
 ========================================
@@ -123,20 +218,50 @@ Target URL: {url}
 ========================================"""
     return report
 
-# ---------------- UI TABS ----------------
+# ---------------- HEADER BANNER ----------------
+st.markdown("""
+<div class="soc-banner">
+    <div>
+        <div class="soc-title">🛡️ ScamGuard SOC-Console</div>
+        <div class="soc-sub">Advanced Local Heuristic Threat Analysis & Behavioral Telemetry Interface</div>
+    </div>
+    <div>
+        <span class="status-badge">🟢 SECURE KERNEL</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Telemetry Overview Metrics
+col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+with col_m1:
+    st.markdown('<div class="metric-container"><div class="metric-val">v3.5.0</div><div class="metric-lbl">Core Version</div></div>', unsafe_allow_html=True)
+with col_m2:
+    st.markdown('<div class="metric-container"><div class="metric-val">LOCAL</div><div class="metric-lbl">Execution Mode</div></div>', unsafe_allow_html=True)
+with col_m3:
+    st.markdown('<div class="metric-container"><div class="metric-val">0.0s</div><div class="metric-lbl">Latency Overhead</div></div>', unsafe_allow_html=True)
+with col_m4:
+    st.markdown('<div class="metric-container"><div class="metric-val">ACTIVE</div><div class="metric-lbl">Defense Kernel</div></div>', unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Main Navigation Tabs
 tab1, tab2, tab3 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🧠 Phishing Awareness Quiz"])
 
 with tab1:
-    st.subheader("Message & Email Threat Scanner")
-    user_msg = st.text_area("Paste suspicious message or email body:", height=120, placeholder="Type or paste text here...")
+    st.markdown("### 📥 Inbound Message & Email Threat Scanner")
+    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Evaluate raw email body content or SMS text payloads for heuristic signature extraction and social engineering risk scoring.</p>", unsafe_allow_html=True)
     
-    if st.button("Run Threat Scan"):
+    user_msg = st.text_area("Message Body:", height=130, placeholder="Paste suspicious message, notice, or email content here...")
+    
+    if st.button("▶ Execute Threat Scan"):
         if not user_msg.strip():
-            st.warning("Please enter text to scan.")
+            st.warning("Please provide input text to analyze.")
         else:
-            with st.spinner("Analyzing text..."):
+            with st.spinner("Processing local heuristic behavioral vectors..."):
                 report = analyze_message_heuristics(user_msg)
-                st.markdown("### Analysis Report")
+                
+                st.markdown("---")
+                st.markdown("### 📋 Threat Analysis Report")
                 st.markdown(report)
                 
                 st.download_button(
@@ -147,16 +272,20 @@ with tab1:
                 )
 
 with tab2:
-    st.subheader("URL Phishing Inspector")
-    url_input = st.text_input("Enter URL to inspect:", placeholder="https://instagramm.com")
+    st.markdown("### 🌐 Structural URL Phishing Inspector")
+    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Deconstruct target domain parameters for typosquatting, syntax obfuscation, and brand spoofing vectors locally.</p>", unsafe_allow_html=True)
     
-    if st.button("Inspect URL"):
+    url_input = st.text_input("Target URL:", placeholder="https://instagramm.com")
+    
+    if st.button("Inspect URL Structure"):
         if not url_input.strip():
-            st.warning("Please enter a URL to inspect.")
+            st.warning("Please enter a target URL.")
         else:
-            with st.spinner("Analyzing URL..."):
+            with st.spinner("Deconstructing domain syntax and token patterns..."):
                 report = analyze_url_heuristics(url_input)
-                st.markdown("### URL Report")
+                
+                st.markdown("---")
+                st.markdown("### 📋 URL Assessment Report")
                 st.markdown(report)
                 
                 st.download_button(
@@ -167,37 +296,50 @@ with tab2:
                 )
 
 with tab3:
-    st.subheader("Security Awareness & Phishing Quiz")
-    st.markdown("Test your ability to spot social engineering tactics and deceptive URLs.")
+    st.markdown("### 🧠 Security Awareness & Phishing Quiz (10 Questions)")
+    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Interactive security assessment module testing foundational knowledge of social engineering and fraud vectors.</p>", unsafe_allow_html=True)
+    st.markdown("---")
     
-    score_tracker = 0
+    q1 = st.radio("**Q1: You receive an SMS stating your bank account is suspended and demanding you click a link to verify credentials immediately. What should you do?**", ["Click the link quickly to fix it", "Ignore the link and check your official banking app/website directly", "Forward the message to friends"], key="q1")
     
-    # Question 1
-    st.markdown("**Q1: You receive an SMS stating your bank account is suspended and demanding you click a link to verify credentials immediately. What should you do?**")
-    q1 = st.radio("Choose an option:", ["Click the link quickly to fix it", "Ignore the link and check your official banking app/website directly", "Forward the message to friends"], key="q1")
+    q2 = st.radio("**Q2: Which of the following URLs shows signs of typosquatting/brand impersonation?**", ["https://www.netflix.com/login", "https://netflix-secure-billing-update.com/signin", "https://help.netflix.com"], key="q2")
     
-    # Question 2
-    st.markdown("**Q2: Which of the following URLs shows signs of typosquatting/brand impersonation?**")
-    q2 = st.radio("Choose an option:", ["https://www.netflix.com/login", "https://netflix-secure-billing-update.com/signin", "https://help.netflix.com"], key="q2")
+    q3 = st.radio("**Q3: What is the primary psychological trigger used in advance-fee or lottery winning scams?**", ["Fear and panic", "Greed and excitement over unexpected wealth", "Curiosity about a package delivery"], key="q3")
+
+    q4 = st.radio("**Q4: What is 'Quishing'?**", ["Quick password resets via SMS", "Phishing attacks conducted using malicious QR codes", "Quiet background listening malware"], key="q4")
+
+    q5 = st.radio("**Q5: Why might an email containing a raw IP address (e.g., http://192.168.1.50/login) instead of a domain name be suspicious?**", ["It means the server is very fast", "Legitimate companies rarely host official login portals on raw internal IP addresses", "IP addresses are immune to phishing"], key="q5")
+
+    q6 = st.radio("**Q6: What does SPF (Sender Policy Framework) help protect against?**", ["Email header spoofing and unauthorized senders", "Computer viruses hidden in PDF attachments", "Slow internet connection speeds"], key="q6")
+
+    q7 = st.radio("**Q7: You receive an email from your 'CEO' asking you to urgently purchase gift cards for a client meeting and send the codes. What is this scam type called?**", ["SQL Injection", "CEO Fraud / Business Email Compromise (BEC)", "Cross-Site Scripting"], key="q7")
+
+    q8 = st.radio("**Q8: Which file extension combination is a classic indicator of a hidden malicious executable payload?**", ["document.pdf", "invoice.pdf.exe", "spreadsheet.xlsx"], key="q8")
+
+    q9 = st.radio("**Q9: What does HTTPS provide that HTTP does not?**", ["Guaranteed safety from all phishing websites", "Encrypted data transmission between your browser and the server", "Faster page loading times"], key="q9")
+
+    q10 = st.radio("**Q10: If a trusted friend's social media account sends you a strange link saying 'Look who died in this video!', what is the most likely cause?**", ["Your friend personally checked the video", "Your friend's account has been compromised by malware or credential theft", "It is an official memorial notification"], key="q10")
     
-    # Question 3
-    st.markdown("**Q3: What is the primary psychological trigger used in advance-fee or lottery winning scams?**")
-    q3 = st.radio("Choose an option:", ["Fear and panic", "Greed and excitement over unexpected wealth", "Curiosity about a package delivery"], key="q3")
-    
-    if st.button("Submit Quiz Answers"):
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("Submit Quiz Assessment"):
         correct_count = 0
-        if q1 == "Ignore the link and check your official banking app/website directly":
-            correct_count += 1
-        if q2 == "https://netflix-secure-billing-update.com/signin":
-            correct_count += 1
-        if q3 == "Greed and excitement over unexpected wealth":
-            correct_count += 1
+        if q1 == "Ignore the link and check your official banking app/website directly": correct_count += 1
+        if q2 == "https://netflix-secure-billing-update.com/signin": correct_count += 1
+        if q3 == "Greed and excitement over unexpected wealth": correct_count += 1
+        if q4 == "Phishing attacks conducted using malicious QR codes": correct_count += 1
+        if q5 == "Legitimate companies rarely host official login portals on raw internal IP addresses": correct_count += 1
+        if q6 == "Email header spoofing and unauthorized senders": correct_count += 1
+        if q7 == "CEO Fraud / Business Email Compromise (BEC)": correct_count += 1
+        if q8 == "invoice.pdf.exe": correct_count += 1
+        if q9 == "Encrypted data transmission between your browser and the server": correct_count += 1
+        if q10 == "Your friend's account has been compromised by malware or credential theft": correct_count += 1
             
         st.markdown("---")
-        st.markdown(f"### 📊 Your Results: {correct_count} / 3 Correct")
-        if correct_count == 3:
-            st.success("🎉 Excellent! You have strong security awareness and can effectively recognize phishing red flags.")
-        elif correct_count >= 1:
-            st.info("👍 Good effort! Review common social engineering patterns to sharpen your defense skills.")
+        st.markdown(f"### 📊 Final Evaluation Score: {correct_count} / 10 Correct")
+        if correct_count >= 9:
+            st.success("🏆 Outstanding! You have professional-level security awareness and threat detection skills.")
+        elif correct_count >= 6:
+            st.info("👍 Good job! You have a solid grasp of core cybersecurity principles with minor room for review.")
         else:
-            st.warning("⚠️ Keep practicing! Be cautious of urgent alerts and lookalike domains.")
+            st.warning("⚠️ Keep practicing! Review common phishing indicators and social engineering tactics to strengthen your defense knowledge.")
+            
