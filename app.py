@@ -10,93 +10,90 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- PROFESSIONAL CSS STYLING ----------------
+# ---------------- PROFESSIONAL CLEAN STYLING ----------------
 def inject_css():
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
         html, body, [class*="css"] { 
-            font-family: 'JetBrains Mono', monospace; 
+            font-family: 'Inter', sans-serif; 
         }
         
         :root { 
-            --bg-deep: #030608; 
-            --bg-panel: #080e13; 
-            --bg-card: #0d161d;
-            --neon-green: #00ff9d; 
-            --neon-cyan: #00e5ff; 
-            --neon-red: #ff2e63; 
-            --neon-amber: #ffb800; 
-            --text-main: #c0d8d0;
-            --border-glow: rgba(0, 255, 157, 0.2);
+            --bg-app: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --primary: #2980b9;
+            --border-color: #e2e8f0;
         }
 
         .stApp { 
-            background: radial-gradient(circle at 10% 20%, #081617 0%, var(--bg-deep) 60%);
+            background-color: var(--bg-app);
             color: var(--text-main); 
         }
 
         #MainMenu, footer, header { visibility: hidden; }
-        .block-container { padding-top: 1.5rem; max-width: 1250px; }
+        .block-container { padding-top: 2rem; max-width: 1100px; }
 
-        /* Custom Header Banner */
+        /* Professional Header Banner */
         .soc-banner { 
-            border: 1px solid var(--border-glow); 
-            background: linear-gradient(135deg, rgba(0,255,157,0.08) 0%, rgba(8,14,19,0.8) 100%); 
+            border: 1px solid var(--border-color); 
+            background: var(--bg-card); 
             border-radius: 8px; 
-            padding: 22px 28px; 
+            padding: 24px 30px; 
             margin-bottom: 24px; 
-            box-shadow: 0 0 30px rgba(0,255,157,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .soc-title { font-size: 26px; font-weight: 800; color: var(--neon-green); letter-spacing: -0.5px; text-shadow: 0 0 15px rgba(0,255,157,0.4); }
-        .soc-sub { color: #6b8a80; font-size: 12px; margin-top: 4px; }
-        .status-badge { background: rgba(0,255,157,0.1); border: 1px solid var(--neon-green); color: var(--neon-green); padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+        .soc-title { font-size: 24px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; }
+        .soc-sub { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+        .status-badge { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
 
         /* Metric Cards */
         .metric-container {
             background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 6px;
-            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
             text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
-        .metric-val { font-size: 18px; font-weight: 700; color: var(--neon-cyan); }
-        .metric-lbl { font-size: 11px; color: #6b8a80; margin-top: 2px; text-transform: uppercase; }
+        .metric-val { font-size: 18px; font-weight: 700; color: #0284c7; }
+        .metric-lbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
         /* Tabs styling */
-        .stTabs [data-baseweb="tab-list"] { gap: 10px; background-color: transparent; }
+        .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: transparent; }
         .stTabs [data-baseweb="tab"] { 
-            background-color: var(--bg-panel); 
-            border: 1px solid rgba(255,255,157,0.08);
+            background-color: #e2e8f0; 
+            border: none;
             border-radius: 6px 6px 0 0; 
-            color: #8fa8a0;
+            color: #475569;
             padding: 10px 20px;
             font-weight: 600;
         }
         .stTabs [aria-selected="true"] { 
             background-color: var(--bg-card) !important; 
-            border-color: var(--neon-green) !important;
-            color: var(--neon-green) !important;
+            color: var(--primary) !important;
+            box-shadow: 0 -2px 0 0 var(--primary);
         }
 
         /* Buttons */
         .stButton button {
-            background: linear-gradient(90deg, rgba(0,255,157,0.15) 0%, rgba(0,229,255,0.15) 100%);
-            border: 1px solid var(--neon-green);
-            color: var(--neon-green);
-            font-weight: 700;
-            border-radius: 4px;
-            padding: 0.6rem 1.2rem;
-            transition: all 0.3s ease;
+            background-color: var(--primary);
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 0.5rem 1.2rem;
+            transition: background 0.2s ease;
         }
         .stButton button:hover {
-            background: var(--neon-green);
-            color: var(--bg-deep);
-            box-shadow: 0 0 15px rgba(0,255,157,0.4);
+            background-color: #1f6391;
+            color: white;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -248,12 +245,12 @@ st.markdown("<br>", unsafe_allow_html=True)
 tab1, tab2, tab3 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🧠 Phishing Awareness Quiz"])
 
 with tab1:
-    st.markdown("### 📥 Inbound Message & Email Threat Scanner")
-    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Evaluate raw email body content or SMS text payloads for heuristic signature extraction and social engineering risk scoring.</p>", unsafe_allow_html=True)
+    st.markdown("### Inbound Message & Email Threat Scanner")
+    st.markdown("<p style='font-size:13px; color:#64748b;'>Evaluate raw email body content or SMS text payloads for heuristic signature extraction and social engineering risk scoring.</p>", unsafe_allow_html=True)
     
     user_msg = st.text_area("Message Body:", height=130, placeholder="Paste suspicious message, notice, or email content here...")
     
-    if st.button("▶ Execute Threat Scan"):
+    if st.button("Execute Threat Scan"):
         if not user_msg.strip():
             st.warning("Please provide input text to analyze.")
         else:
@@ -261,19 +258,19 @@ with tab1:
                 report = analyze_message_heuristics(user_msg)
                 
                 st.markdown("---")
-                st.markdown("### 📋 Threat Analysis Report")
+                st.markdown("### Threat Analysis Report")
                 st.markdown(report)
                 
                 st.download_button(
-                    label="📥 Download Incident Report",
+                    label="Download Incident Report",
                     data=report,
                     file_name=f"threat_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
                     mime="text/plain"
                 )
 
 with tab2:
-    st.markdown("### 🌐 Structural URL Phishing Inspector")
-    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Deconstruct target domain parameters for typosquatting, syntax obfuscation, and brand spoofing vectors locally.</p>", unsafe_allow_html=True)
+    st.markdown("### Structural URL Phishing Inspector")
+    st.markdown("<p style='font-size:13px; color:#64748b;'>Deconstruct target domain parameters for typosquatting, syntax obfuscation, and brand spoofing vectors locally.</p>", unsafe_allow_html=True)
     
     url_input = st.text_input("Target URL:", placeholder="https://instagramm.com")
     
@@ -285,61 +282,66 @@ with tab2:
                 report = analyze_url_heuristics(url_input)
                 
                 st.markdown("---")
-                st.markdown("### 📋 URL Assessment Report")
+                st.markdown("### URL Assessment Report")
                 st.markdown(report)
                 
                 st.download_button(
-                    label="📥 Download Incident Report",
+                    label="Download Incident Report",
                     data=report,
                     file_name=f"url_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
                     mime="text/plain"
                 )
 
 with tab3:
-    st.markdown("### 🧠 Security Awareness & Phishing Quiz (10 Questions)")
-    st.markdown("<p style='font-size:12px; color:#6b8a80;'>Interactive security assessment module testing foundational knowledge of social engineering and fraud vectors.</p>", unsafe_allow_html=True)
+    st.markdown("### Security Awareness & Phishing Quiz (10 Questions)")
+    st.markdown("<p style='font-size:13px; color:#64748b;'>Interactive security assessment module testing foundational knowledge of social engineering and fraud vectors.</p>", unsafe_allow_html=True)
     st.markdown("---")
     
-    q1 = st.radio("**Q1: You receive an SMS stating your bank account is suspended and demanding you click a link to verify credentials immediately. What should you do?**", ["Click the link quickly to fix it", "Ignore the link and check your official banking app/website directly", "Forward the message to friends"], key="q1")
+    # Using index=None ensures no option is selected by default
+    q1 = st.radio("Q1: You receive an SMS stating your bank account is suspended and demanding you click a link to verify credentials immediately. What should you do?", ["Click the link quickly to fix it", "Ignore the link and check your official banking app/website directly", "Forward the message to friends"], index=None, key="q1")
     
-    q2 = st.radio("**Q2: Which of the following URLs shows signs of typosquatting/brand impersonation?**", ["https://www.netflix.com/login", "https://netflix-secure-billing-update.com/signin", "https://help.netflix.com"], key="q2")
+    q2 = st.radio("Q2: Which of the following URLs shows signs of typosquatting/brand impersonation?", ["https://www.netflix.com/login", "https://netflix-secure-billing-update.com/signin", "https://help.netflix.com"], index=None, key="q2")
     
-    q3 = st.radio("**Q3: What is the primary psychological trigger used in advance-fee or lottery winning scams?**", ["Fear and panic", "Greed and excitement over unexpected wealth", "Curiosity about a package delivery"], key="q3")
+    q3 = st.radio("Q3: What is the primary psychological trigger used in advance-fee or lottery winning scams?", ["Fear and panic", "Greed and excitement over unexpected wealth", "Curiosity about a package delivery"], index=None, key="q3")
 
-    q4 = st.radio("**Q4: What is 'Quishing'?**", ["Quick password resets via SMS", "Phishing attacks conducted using malicious QR codes", "Quiet background listening malware"], key="q4")
+    q4 = st.radio("Q4: What is 'Quishing'?", ["Quick password resets via SMS", "Phishing attacks conducted using malicious QR codes", "Quiet background listening malware"], index=None, key="q4")
 
-    q5 = st.radio("**Q5: Why might an email containing a raw IP address (e.g., http://192.168.1.50/login) instead of a domain name be suspicious?**", ["It means the server is very fast", "Legitimate companies rarely host official login portals on raw internal IP addresses", "IP addresses are immune to phishing"], key="q5")
+    q5 = st.radio("Q5: Why might an email containing a raw IP address (e.g., http://192.168.1.50/login) instead of a domain name be suspicious?", ["It means the server is very fast", "Legitimate companies rarely host official login portals on raw internal IP addresses", "IP addresses are immune to phishing"], index=None, key="q5")
 
-    q6 = st.radio("**Q6: What does SPF (Sender Policy Framework) help protect against?**", ["Email header spoofing and unauthorized senders", "Computer viruses hidden in PDF attachments", "Slow internet connection speeds"], key="q6")
+    q6 = st.radio("Q6: What does SPF (Sender Policy Framework) help protect against?", ["Email header spoofing and unauthorized senders", "Computer viruses hidden in PDF attachments", "Slow internet connection speeds"], index=None, key="q6")
 
-    q7 = st.radio("**Q7: You receive an email from your 'CEO' asking you to urgently purchase gift cards for a client meeting and send the codes. What is this scam type called?**", ["SQL Injection", "CEO Fraud / Business Email Compromise (BEC)", "Cross-Site Scripting"], key="q7")
+    q7 = st.radio("Q7: You receive an email from your 'CEO' asking you to urgently purchase gift cards for a client meeting and send the codes. What is this scam type called?", ["SQL Injection", "CEO Fraud / Business Email Compromise (BEC)", "Cross-Site Scripting"], index=None, key="q7")
 
-    q8 = st.radio("**Q8: Which file extension combination is a classic indicator of a hidden malicious executable payload?**", ["document.pdf", "invoice.pdf.exe", "spreadsheet.xlsx"], key="q8")
+    q8 = st.radio("Q8: Which file extension combination is a classic indicator of a hidden malicious executable payload?", ["document.pdf", "invoice.pdf.exe", "spreadsheet.xlsx"], index=None, key="q8")
 
-    q9 = st.radio("**Q9: What does HTTPS provide that HTTP does not?**", ["Guaranteed safety from all phishing websites", "Encrypted data transmission between your browser and the server", "Faster page loading times"], key="q9")
+    q9 = st.radio("Q9: What does HTTPS provide that HTTP does not?", ["Guaranteed safety from all phishing websites", "Encrypted data transmission between your browser and the server", "Faster page loading times"], index=None, key="q9")
 
-    q10 = st.radio("**Q10: If a trusted friend's social media account sends you a strange link saying 'Look who died in this video!', what is the most likely cause?**", ["Your friend personally checked the video", "Your friend's account has been compromised by malware or credential theft", "It is an official memorial notification"], key="q10")
+    q10 = st.radio("Q10: If a trusted friend's social media account sends you a strange link saying 'Look who died in this video!', what is the most likely cause?", ["Your friend personally checked the video", "Your friend's account has been compromised by malware or credential theft", "It is an official memorial notification"], index=None, key="q10")
     
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("Submit Quiz Assessment"):
-        correct_count = 0
-        if q1 == "Ignore the link and check your official banking app/website directly": correct_count += 1
-        if q2 == "https://netflix-secure-billing-update.com/signin": correct_count += 1
-        if q3 == "Greed and excitement over unexpected wealth": correct_count += 1
-        if q4 == "Phishing attacks conducted using malicious QR codes": correct_count += 1
-        if q5 == "Legitimate companies rarely host official login portals on raw internal IP addresses": correct_count += 1
-        if q6 == "Email header spoofing and unauthorized senders": correct_count += 1
-        if q7 == "CEO Fraud / Business Email Compromise (BEC)": correct_count += 1
-        if q8 == "invoice.pdf.exe": correct_count += 1
-        if q9 == "Encrypted data transmission between your browser and the server": correct_count += 1
-        if q10 == "Your friend's account has been compromised by malware or credential theft": correct_count += 1
-            
-        st.markdown("---")
-        st.markdown(f"### 📊 Final Evaluation Score: {correct_count} / 10 Correct")
-        if correct_count >= 9:
-            st.success("🏆 Outstanding! You have professional-level security awareness and threat detection skills.")
-        elif correct_count >= 6:
-            st.info("👍 Good job! You have a solid grasp of core cybersecurity principles with minor room for review.")
+        # Check if all questions are answered
+        answers = [q1, q2, q3, q4, q5, q6, q7, q8, q9, q10]
+        if any(ans is None for ans in answers):
+            st.warning("⚠️ Please answer all 10 questions before submitting your assessment.")
         else:
-            st.warning("⚠️ Keep practicing! Review common phishing indicators and social engineering tactics to strengthen your defense knowledge.")
-            
+            correct_count = 0
+            if q1 == "Ignore the link and check your official banking app/website directly": correct_count += 1
+            if q2 == "https://netflix-secure-billing-update.com/signin": correct_count += 1
+            if q3 == "Greed and excitement over unexpected wealth": correct_count += 1
+            if q4 == "Phishing attacks conducted using malicious QR codes": correct_count += 1
+            if q5 == "Legitimate companies rarely host official login portals on raw internal IP addresses": correct_count += 1
+            if q6 == "Email header spoofing and unauthorized senders": correct_count += 1
+            if q7 == "CEO Fraud / Business Email Compromise (BEC)": correct_count += 1
+            if q8 == "invoice.pdf.exe": correct_count += 1
+            if q9 == "Encrypted data transmission between your browser and the server": correct_count += 1
+            if q10 == "Your friend's account has been compromised by malware or credential theft": correct_count += 1
+                
+            st.markdown("---")
+            st.markdown(f"### 📊 Final Evaluation Score: {correct_count} / 10 Correct")
+            if correct_count >= 9:
+                st.success("🏆 Outstanding! You have professional-level security awareness and threat detection skills.")
+            elif correct_count >= 6:
+                st.info("👍 Good job! You have a solid grasp of core cybersecurity principles with minor room for review.")
+            else:
+                st.warning("⚠️ Keep practicing! Review common phishing indicators and social engineering tactics to strengthen your defense knowledge.")
