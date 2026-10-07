@@ -18,15 +18,16 @@ def inject_css():
         
         html, body, [class*="css"] { 
             font-family: 'Inter', sans-serif; 
+            color: #1e293b;
         }
         
         :root { 
-            --bg-app: #f4f6f9;
+            --bg-app: #f8fafc;
             --bg-card: #ffffff;
-            --text-main: #2c3e50;
-            --text-muted: #7f8c8d;
-            --primary: #2980b9;
-            --border-color: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #0284c7;
+            --border-color: #cbd5e1;
         }
 
         .stApp { 
@@ -49,21 +50,19 @@ def inject_css():
             justify-content: space-between;
             align-items: center;
         }
-        .soc-title { font-size: 24px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; }
+        .soc-title { font-size: 24px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
         .soc-sub { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
         .status-badge { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
 
-        /* Metric Cards */
-        .metric-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        /* Fix text color visibility across elements */
+        p, span, label, div, .stMarkdown {
+            color: #1e293b !important;
         }
-        .metric-val { font-size: 18px; font-weight: 700; color: #0284c7; }
-        .metric-lbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        
+        .stRadio label p {
+            color: #1e293b !important;
+            font-weight: 500;
+        }
 
         /* Tabs styling */
         .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: transparent; }
@@ -71,7 +70,7 @@ def inject_css():
             background-color: #e2e8f0; 
             border: none;
             border-radius: 6px 6px 0 0; 
-            color: #475569;
+            color: #334155 !important;
             padding: 10px 20px;
             font-weight: 600;
         }
@@ -85,27 +84,37 @@ def inject_css():
         .stButton button {
             background-color: var(--primary);
             border: none;
-            color: white;
+            color: white !important;
             font-weight: 600;
             border-radius: 6px;
             padding: 0.5rem 1.2rem;
             transition: background 0.2s ease;
         }
         .stButton button:hover {
-            background-color: #1f6391;
-            color: white;
+            background-color: #0369a1;
         }
     </style>
     """, unsafe_allow_html=True)
 
 inject_css()
 
-# Sidebar Configuration View
+# ---------------- SIDEBAR DASHBOARD ----------------
 st.sidebar.markdown("### ⚙️ SOC Control Panel")
 st.sidebar.text_input("Node Security Token", type="password", placeholder="NODE-SECURE-KEY")
+
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 System Telemetry")
-st.sidebar.info("Defense Engine: **OPERATIONAL**\n\nMode: **LOCAL HEURISTIC KERNEL**\n\nDatabase: **DYNAMIC VECTOR**")
+st.sidebar.markdown(
+    """
+    - **Core Version:** v3.5.0
+    - **Execution Mode:** Local Kernel
+    - **Latency Overhead:** 0.0s
+    - **Defense Status:** Active
+    """,
+    unsafe_allow_html=True
+)
+st.sidebar.markdown("---")
+st.sidebar.info("Operational Status: **SECURE**\n\nHeuristic Engine running locally without external API dependencies.")
 
 # ---------------- MANUAL HEURISTIC ENGINE ----------------
 FRAUD_SIGNALS = {
@@ -228,19 +237,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Telemetry Overview Metrics
-col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-with col_m1:
-    st.markdown('<div class="metric-container"><div class="metric-val">v3.5.0</div><div class="metric-lbl">Core Version</div></div>', unsafe_allow_html=True)
-with col_m2:
-    st.markdown('<div class="metric-container"><div class="metric-val">LOCAL</div><div class="metric-lbl">Execution Mode</div></div>', unsafe_allow_html=True)
-with col_m3:
-    st.markdown('<div class="metric-container"><div class="metric-val">0.0s</div><div class="metric-lbl">Latency Overhead</div></div>', unsafe_allow_html=True)
-with col_m4:
-    st.markdown('<div class="metric-container"><div class="metric-val">ACTIVE</div><div class="metric-lbl">Defense Kernel</div></div>', unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
 # Main Navigation Tabs
 tab1, tab2, tab3 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🧠 Phishing Awareness Quiz"])
 
@@ -297,7 +293,6 @@ with tab3:
     st.markdown("<p style='font-size:13px; color:#64748b;'>Interactive security assessment module testing foundational knowledge of social engineering and fraud vectors.</p>", unsafe_allow_html=True)
     st.markdown("---")
     
-    # Using index=None ensures no option is selected by default
     q1 = st.radio("Q1: You receive an SMS stating your bank account is suspended and demanding you click a link to verify credentials immediately. What should you do?", ["Click the link quickly to fix it", "Ignore the link and check your official banking app/website directly", "Forward the message to friends"], index=None, key="q1")
     
     q2 = st.radio("Q2: Which of the following URLs shows signs of typosquatting/brand impersonation?", ["https://www.netflix.com/login", "https://netflix-secure-billing-update.com/signin", "https://help.netflix.com"], index=None, key="q2")
@@ -320,7 +315,6 @@ with tab3:
     
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("Submit Quiz Assessment"):
-        # Check if all questions are answered
         answers = [q1, q2, q3, q4, q5, q6, q7, q8, q9, q10]
         if any(ans is None for ans in answers):
             st.warning("⚠️ Please answer all 10 questions before submitting your assessment.")
