@@ -54,7 +54,7 @@ def inject_css():
         .soc-sub { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
         .status-badge { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
 
-        /* General labels and text visibility */
+        /* Text visibility across elements */
         p, span, label, div, .stMarkdown {
             color: #1e293b !important;
         }
@@ -64,7 +64,7 @@ def inject_css():
             font-weight: 500;
         }
 
-        /* Fix Streamlit text areas and input boxes for readability */
+        /* Fix text areas and input boxes for readability */
         textarea, input {
             color: #0f172a !important;
             background-color: #ffffff !important;
@@ -251,8 +251,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Main Navigation Tabs
-tab1, tab2, tab3 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🧠 Phishing Awareness Quiz"])
+# Main Navigation Tabs (Added Mentor Feedback Tab)
+tab1, tab2, tab3, tab4 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🧠 Phishing Quiz", "📝 Mentor Feedback"])
 
 with tab1:
     st.markdown("### Inbound Message & Email Threat Scanner")
@@ -330,23 +330,14 @@ with tab3:
     st.markdown("---")
     
     q1 = st.radio("Q1: You receive an SMS stating your bank account is suspended and demanding you click a link to verify credentials immediately. What should you do?", ["Click the link quickly to fix it", "Ignore the link and check your official banking app/website directly", "Forward the message to friends"], index=None, key="q1")
-    
     q2 = st.radio("Q2: Which of the following URLs shows signs of typosquatting/brand impersonation?", ["https://www.netflix.com/login", "https://netflix-secure-billing-update.com/signin", "https://help.netflix.com"], index=None, key="q2")
-    
     q3 = st.radio("Q3: What is the primary psychological trigger used in advance-fee or lottery winning scams?", ["Fear and panic", "Greed and excitement over unexpected wealth", "Curiosity about a package delivery"], index=None, key="q3")
-
     q4 = st.radio("Q4: What is 'Quishing'?", ["Quick password resets via SMS", "Phishing attacks conducted using malicious QR codes", "Quiet background listening malware"], index=None, key="q4")
-
     q5 = st.radio("Q5: Why might an email containing a raw IP address (e.g., http://192.168.1.50/login) instead of a domain name be suspicious?", ["It means the server is very fast", "Legitimate companies rarely host official login portals on raw internal IP addresses", "IP addresses are immune to phishing"], index=None, key="q5")
-
     q6 = st.radio("Q6: What does SPF (Sender Policy Framework) help protect against?", ["Email header spoofing and unauthorized senders", "Computer viruses hidden in PDF attachments", "Slow internet connection speeds"], index=None, key="q6")
-
     q7 = st.radio("Q7: You receive an email from your 'CEO' asking you to urgently purchase gift cards for a client meeting and send the codes. What is this scam type called?", ["SQL Injection", "CEO Fraud / Business Email Compromise (BEC)", "Cross-Site Scripting"], index=None, key="q7")
-
     q8 = st.radio("Q8: Which file extension combination is a classic indicator of a hidden malicious executable payload?", ["document.pdf", "invoice.pdf.exe", "spreadsheet.xlsx"], index=None, key="q8")
-
     q9 = st.radio("Q9: What does HTTPS provide that HTTP does not?", ["Guaranteed safety from all phishing websites", "Encrypted data transmission between your browser and the server", "Faster page loading times"], index=None, key="q9")
-
     q10 = st.radio("Q10: If a trusted friend's social media account sends you a strange link saying 'Look who died in this video!', what is the most likely cause?", ["Your friend personally checked the video", "Your friend's account has been compromised by malware or credential theft", "It is an official memorial notification"], index=None, key="q10")
     
     st.markdown("<br>", unsafe_allow_html=True)
@@ -375,3 +366,14 @@ with tab3:
                 st.info("👍 Good job! You have a solid grasp of core cybersecurity principles with minor room for review.")
             else:
                 st.warning("⚠️ Keep practicing! Review common phishing indicators and social engineering tactics to strengthen your defense knowledge.")
+
+with tab4:
+    st.markdown("### 📝 Mentor & Evaluation Feedback Portal")
+    st.markdown("<p style='font-size:13px; color:#64748b;'>Please submit your review or evaluation feedback below. Submissions link directly to official project records.</p>", unsafe_allow_html=True)
+    st.markdown("---")
+    
+    # PASTE YOUR GOOGLE FORM EMBED URL BELOW (Inside the quotes)
+    # How to get it: Create a Google Form -> Click 'Send' -> Click '<>' (Embed HTML) -> Copy the src="https://..." URL
+    google_form_embed_url = "https://docs.google.com/forms/d/e/1FAIpQLSeYOUR_FORM_ID_HERE/viewform?embedded=true"
+    
+    st.components.v1.iframe(google_form_embed_url, height=750, scrolling=True)
