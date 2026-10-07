@@ -229,7 +229,7 @@ st.markdown("""
 <div class="soc-banner">
     <div>
         <div class="soc-title">🛡️ ScamGuard SOC-Console</div>
-        <div class="soc-sub">Advanced Local Heuristic Threat Analysis & Behavioral Telemetry Interface</div>
+        <div class="soc-sub"> Phishing Scam & Fraud Detection</div>
     </div>
     <div>
         <span class="status-badge">🟢 SECURE KERNEL</span>
