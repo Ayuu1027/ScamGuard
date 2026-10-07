@@ -54,7 +54,7 @@ def inject_css():
         .soc-sub { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
         .status-badge { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
 
-        /* Fix text color visibility across elements */
+        /* General labels and text visibility */
         p, span, label, div, .stMarkdown {
             color: #1e293b !important;
         }
@@ -62,6 +62,13 @@ def inject_css():
         .stRadio label p {
             color: #1e293b !important;
             font-weight: 500;
+        }
+
+        /* Fix Streamlit text areas and input boxes for readability */
+        textarea, input {
+            color: #0f172a !important;
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
         }
 
         /* Tabs styling */
@@ -251,7 +258,6 @@ with tab1:
     st.markdown("### Inbound Message & Email Threat Scanner")
     st.markdown("<p style='font-size:13px; color:#64748b;'>Evaluate raw email body content or SMS text payloads for heuristic signature extraction and social engineering risk scoring.</p>", unsafe_allow_html=True)
     
-    # Quick-Fill Payload Buttons
     col_b1, col_b2, col_b3 = st.columns(3)
     with col_b1:
         if st.button("Load Phishing SMS Sample"):
@@ -287,7 +293,6 @@ with tab2:
     st.markdown("### Structural URL Phishing Inspector")
     st.markdown("<p style='font-size:13px; color:#64748b;'>Deconstruct target domain parameters for typosquatting, syntax obfuscation, and brand spoofing vectors locally.</p>", unsafe_allow_html=True)
     
-    # Quick-Fill URL Buttons
     col_u1, col_u2, col_u3 = st.columns(3)
     with col_u1:
         if st.button("Load Typosquat URL"):
