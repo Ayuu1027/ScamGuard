@@ -12,7 +12,7 @@ st.set_page_config(
 
 # Simple Header
 st.markdown("### 🛡️ ScamGuard - Phishing & Fraud Detection Console")
-st.markdown("<p style='font-size: 13px; color: #888;'>Local Heuristic Threat Analysis Engine</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 13px; color: #888;'>Local Heuristic Threat Analysis & Security Awareness Engine</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # ---------------- MANUAL HEURISTIC ENGINE ----------------
@@ -124,7 +124,7 @@ Target URL: {url}
     return report
 
 # ---------------- UI TABS ----------------
-tab1, tab2 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector"])
+tab1, tab2, tab3 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🧠 Phishing Awareness Quiz"])
 
 with tab1:
     st.subheader("Message & Email Threat Scanner")
@@ -165,3 +165,39 @@ with tab2:
                     file_name=f"url_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
                     mime="text/plain"
                 )
+
+with tab3:
+    st.subheader("Security Awareness & Phishing Quiz")
+    st.markdown("Test your ability to spot social engineering tactics and deceptive URLs.")
+    
+    score_tracker = 0
+    
+    # Question 1
+    st.markdown("**Q1: You receive an SMS stating your bank account is suspended and demanding you click a link to verify credentials immediately. What should you do?**")
+    q1 = st.radio("Choose an option:", ["Click the link quickly to fix it", "Ignore the link and check your official banking app/website directly", "Forward the message to friends"], key="q1")
+    
+    # Question 2
+    st.markdown("**Q2: Which of the following URLs shows signs of typosquatting/brand impersonation?**")
+    q2 = st.radio("Choose an option:", ["https://www.netflix.com/login", "https://netflix-secure-billing-update.com/signin", "https://help.netflix.com"], key="q2")
+    
+    # Question 3
+    st.markdown("**Q3: What is the primary psychological trigger used in advance-fee or lottery winning scams?**")
+    q3 = st.radio("Choose an option:", ["Fear and panic", "Greed and excitement over unexpected wealth", "Curiosity about a package delivery"], key="q3")
+    
+    if st.button("Submit Quiz Answers"):
+        correct_count = 0
+        if q1 == "Ignore the link and check your official banking app/website directly":
+            correct_count += 1
+        if q2 == "https://netflix-secure-billing-update.com/signin":
+            correct_count += 1
+        if q3 == "Greed and excitement over unexpected wealth":
+            correct_count += 1
+            
+        st.markdown("---")
+        st.markdown(f"### 📊 Your Results: {correct_count} / 3 Correct")
+        if correct_count == 3:
+            st.success("🎉 Excellent! You have strong security awareness and can effectively recognize phishing red flags.")
+        elif correct_count >= 1:
+            st.info("👍 Good effort! Review common social engineering patterns to sharpen your defense skills.")
+        else:
+            st.warning("⚠️ Keep practicing! Be cautious of urgent alerts and lookalike domains.")
