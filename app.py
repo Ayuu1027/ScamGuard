@@ -252,7 +252,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Main Navigation Tabs (Added Mentor Feedback Tab)
-tab1, tab2, tab3, tab4 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🧠 Phishing Quiz", "📝 Mentor Feedback"])
+tab1, tab2, tab3, tab4 = st.tabs(["🔍 Threat Scan", "🔗 URL Inspector", "🧠 Phishing Quiz", "📝 Feedback"])
 
 with tab1:
     st.markdown("### Inbound Message & Email Threat Scanner")
